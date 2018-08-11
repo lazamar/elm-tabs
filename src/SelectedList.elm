@@ -5,6 +5,7 @@ module SelectedList
         , fromList
         , fromNonempty
         , toList
+        , toTupleList
         , select
         , selected
         , filterMap
@@ -49,6 +50,15 @@ fromNonempty nlist =
 toList : SelectedList a -> List a
 toList (SelectedList before selected after) =
     List.concat [ before, [ selected ], after ]
+
+
+toTupleList : SelectedList a -> List ( Bool, a )
+toTupleList (SelectedList before selected after) =
+    List.concat
+        [ List.map (\a -> ( False, a )) before
+        , [ ( True, selected ) ]
+        , List.map (\a -> ( False, a )) after
+        ]
 
 
 select : SelectedList a -> a -> SelectedList a

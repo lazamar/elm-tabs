@@ -1,7 +1,7 @@
 module Tabs exposing (..)
 
 import Html exposing (Html, div, text)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, classList)
 import SelectedList exposing (SelectedList)
 import List.Nonempty as Nonempty exposing (Nonempty)
 import List.Extra
@@ -98,6 +98,45 @@ view model tabs =
 tab : TabConfig msg -> (a -> Html msg) -> a -> Tab msg
 tab config view content =
     Tab config (view content)
+
+
+viewSection : (Msg -> msg) -> Section (Tab msg) -> Html msg
+viewSection toMsg section =
+    case section of
+        TabGroup tabs ->
+            div
+                [ class "tabs-tabgroup" ]
+                [ div [ class "tabs-tabgroup-headers" ]
+                    (tabs
+                        |> SelectedList.toTupleList
+                        |> List.map tabHeader
+                    )
+                    |> Html.map toMsg
+                ]
+
+        Divider orientation percentage s1 s2 ->
+            div
+                [ classList
+                    [ ( "tabs-divider", True )
+                    , ( "tabs-divider--horizontal", orientation == Horizontal )
+                    , ( "tabs-divider--vertical", orientation == Vertical )
+                    ]
+                ]
+                CONTINUE
+                FROM
+                HERE
+                []
+
+
+tabHeader : ( Bool, Tab msg ) -> Html Msg
+tabHeader ( selected, Tab { id, title } _ ) =
+    div
+        [ classList
+            [ ( "tabs-tabgroup-header", True )
+            , ( "tabs-tabgroup-header--selected", selected )
+            ]
+        ]
+        [ text title ]
 
 
 renderTab : Tab msg -> Html msg
