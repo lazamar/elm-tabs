@@ -11,8 +11,20 @@ view model =
         []
         [ text "I'm working!"
         , Tabs.tabs
-            [ Tabs.tab "First Tab" DoNothing showFirst "Here is some content"
-            , Tabs.tab "Second Tab" DoNothing showSecond 2
+            [ Tabs.tab
+                { id = "1"
+                , title = "First Tab"
+                , onClose = DoNothing
+                }
+                showFirst
+                "Here is some content"
+            , Tabs.tab
+                { id = "2"
+                , title = "Second tab"
+                , onClose = DoNothing
+                }
+                showSecond
+                2
             ]
         ]
 

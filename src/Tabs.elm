@@ -35,21 +35,20 @@ type Section msg
     | Divider Orientation Percentage Section Section
 
 
-type alias Title =
-    String
-
-
-type alias Content msg =
-    Html msg
-
-
 type Tab msg
-    = Tab Title msg (() -> Html msg)
+    = Tab (TabConfig msg) (Html msg)
 
 
-tab : Title -> msg -> (a -> Html msg) -> a -> Tab msg
-tab title onClose view content =
-    Tab title onClose (\() -> view content)
+type alias TabConfig msg =
+    { id : String
+    , title : String
+    , onClose : msg
+    }
+
+
+tab : TabConfig msg -> (a -> Html msg) -> a -> Tab msg
+tab config view content =
+    Tab config (view content)
 
 
 tabs : List (Tab msg) -> Html msg
@@ -60,9 +59,9 @@ tabs tabList =
 
 
 renderTab : Tab msg -> Html msg
-renderTab (Tab title onClose toContent) =
+renderTab (Tab config content) =
     div
         [ class "tab" ]
-        [ div [ class "tab-title" ] [ text title ]
-        , div [ class "tab-content" ] [ toContent () ]
+        [ div [ class "tab-title" ] [ text config.title ]
+        , div [ class "tab-content" ] [ content ]
         ]

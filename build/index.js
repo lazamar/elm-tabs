@@ -9807,7 +9807,7 @@ var _user$project$Tabs$renderTab = function (_p0) {
 				},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p1._0),
+					_0: _elm_lang$html$Html$text(_p1._0.title),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
@@ -9821,8 +9821,7 @@ var _user$project$Tabs$renderTab = function (_p0) {
 					},
 					{
 						ctor: '::',
-						_0: _p1._2(
-							{ctor: '_Tuple0'}),
+						_0: _p1._1,
 						_1: {ctor: '[]'}
 					}),
 				_1: {ctor: '[]'}
@@ -9842,6 +9841,10 @@ var _user$project$Tabs$tabs = function (tabList) {
 var _user$project$Tabs$Model = function (a) {
 	return {toMsg: a};
 };
+var _user$project$Tabs$TabConfig = F3(
+	function (a, b, c) {
+		return {id: a, title: b, onClose: c};
+	});
 var _user$project$Tabs$Close = function (a) {
 	return {ctor: 'Close', _0: a};
 };
@@ -9854,20 +9857,16 @@ var _user$project$Tabs$Divider = F4(
 var _user$project$Tabs$TabGroup = function (a) {
 	return {ctor: 'TabGroup', _0: a};
 };
-var _user$project$Tabs$Tab = F3(
-	function (a, b, c) {
-		return {ctor: 'Tab', _0: a, _1: b, _2: c};
+var _user$project$Tabs$Tab = F2(
+	function (a, b) {
+		return {ctor: 'Tab', _0: a, _1: b};
 	});
-var _user$project$Tabs$tab = F4(
-	function (title, onClose, view, content) {
-		return A3(
+var _user$project$Tabs$tab = F3(
+	function (config, view, content) {
+		return A2(
 			_user$project$Tabs$Tab,
-			title,
-			onClose,
-			function (_p2) {
-				var _p3 = _p2;
-				return view(content);
-			});
+			config,
+			view(content));
 	});
 
 var _user$project$View$showSecond = function (number) {
@@ -9906,10 +9905,18 @@ var _user$project$View$view = function (model) {
 				_0: _user$project$Tabs$tabs(
 					{
 						ctor: '::',
-						_0: A4(_user$project$Tabs$tab, 'First Tab', _user$project$Types$DoNothing, _user$project$View$showFirst, 'Here is some content'),
+						_0: A3(
+							_user$project$Tabs$tab,
+							{id: '1', title: 'First Tab', onClose: _user$project$Types$DoNothing},
+							_user$project$View$showFirst,
+							'Here is some content'),
 						_1: {
 							ctor: '::',
-							_0: A4(_user$project$Tabs$tab, 'Second Tab', _user$project$Types$DoNothing, _user$project$View$showSecond, 2),
+							_0: A3(
+								_user$project$Tabs$tab,
+								{id: '2', title: 'Second tab', onClose: _user$project$Types$DoNothing},
+								_user$project$View$showSecond,
+								2),
 							_1: {ctor: '[]'}
 						}
 					}),
