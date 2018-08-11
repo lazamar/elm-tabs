@@ -5,7 +5,11 @@ import Types exposing (..)
 
 init : ( Model, Cmd Msg )
 init =
-    Debug.log "Called at least once" Model ! []
+    let
+        doIrun val =
+            Debug.log "Called at least once" "DoIrun"
+    in
+        Model ! []
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
