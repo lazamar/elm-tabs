@@ -1,9 +1,13 @@
 module Types exposing (..)
 
+import Tabs
 
-type Model
-    = Model
+
+type alias Model =
+    { tabs : Tabs.Model Msg
+    }
 
 
 type Msg
     = DoNothing
+    | TabsMsg Tabs.Msg
