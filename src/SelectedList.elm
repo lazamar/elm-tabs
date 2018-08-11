@@ -3,12 +3,15 @@ module SelectedList
         ( SelectedList
         , singleton
         , fromList
+        , fromNonempty
         , toList
         , select
         , selected
+        , filterMap
         )
 
 import List.Extra
+import List.Nonempty as Nonempty exposing (Nonempty)
 
 
 {-
@@ -38,6 +41,11 @@ fromList l =
             Just <| SelectedList [] a (List.drop 1 l)
 
 
+fromNonempty : Nonempty a -> SelectedList a
+fromNonempty nlist =
+    SelectedList [] (Nonempty.head nlist) (Nonempty.tail nlist)
+
+
 toList : SelectedList a -> List a
 toList (SelectedList before selected after) =
     List.concat [ before, [ selected ], after ]
@@ -61,3 +69,26 @@ select slist newSelected =
 selected : SelectedList a -> a
 selected (SelectedList _ s _) =
     s
+
+
+{-| if the selected element is filtered out, the first element
+becomes selected.
+
+If all elements are filtered out, the result is Nothing
+
+-}
+filterMap : (a -> Maybe b) -> SelectedList a -> Maybe (SelectedList b)
+filterMap f (SelectedList before selected after) =
+    case f selected of
+        Just v ->
+            Just <|
+                SelectedList
+                    (List.filterMap f before)
+                    v
+                    (List.filterMap f after)
+
+        Nothing ->
+            [ before, after ]
+                |> List.concat
+                |> List.filterMap f
+                |> fromList

@@ -4,6 +4,7 @@ import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import SelectedList exposing (SelectedList)
 import List.Nonempty as Nonempty exposing (Nonempty)
+import List.Extra
 
 
 {-
@@ -106,3 +107,51 @@ renderTab (Tab config content) =
         [ div [ class "tab-title" ] [ text config.title ]
         , div [ class "tab-content" ] [ content ]
         ]
+
+
+toLayout : Maybe (Section ID) -> Nonempty (Tab msg) -> Section (Tab msg)
+toLayout mids tabs =
+    let
+        tabsList =
+            Nonempty.toList tabs
+
+        tabId (Tab { id } _) =
+            id
+
+        getTab id =
+            List.Extra.find (tabId >> (==) id) tabsList
+
+        msection =
+            Maybe.andThen (fromSection getTab) mids
+    in
+        case msection of
+            Nothing ->
+                TabGroup (SelectedList.fromNonempty tabs)
+
+            Just section ->
+                section
+
+
+fromSection : (ID -> Maybe (Tab msg)) -> Section ID -> Maybe (Section (Tab msg))
+fromSection getTab section =
+    case section of
+        TabGroup idList ->
+            case SelectedList.filterMap getTab idList of
+                Nothing ->
+                    Nothing
+
+                Just tabs ->
+                    Just <| TabGroup tabs
+
+        Divider orientation percentage s1 s2 ->
+            case fromSection getTab s1 of
+                Nothing ->
+                    fromSection getTab s2
+
+                Just content1 ->
+                    case fromSection getTab s2 of
+                        Nothing ->
+                            Just content1
+
+                        Just content2 ->
+                            Just <| Divider orientation percentage content1 content2
