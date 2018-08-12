@@ -1,7 +1,7 @@
 module Tabs exposing (..)
 
 import Html exposing (Html, div, text)
-import Html.Attributes exposing (class, classList)
+import Html.Attributes exposing (class, classList, style)
 import Html.Events exposing (onClick)
 import SelectedList exposing (SelectedList)
 import List.Nonempty as Nonempty exposing (Nonempty)
@@ -77,7 +77,18 @@ init : (Msg msg -> msg) -> Model msg
 init toMsg =
     Model
         { toMsg = toMsg
-        , sections = Nothing
+        , sections =
+            Just <|
+                Divider
+                    Horizontal
+                    40
+                    (TabGroup <| SelectedList.singleton "1")
+                    (Divider
+                        Vertical
+                        60
+                        (TabGroup <| SelectedList.singleton "1")
+                        (TabGroup <| SelectedList.singleton "2")
+                    )
         }
 
 
@@ -160,11 +171,10 @@ viewSection toMsg root section =
         TabGroup tabs ->
             div
                 [ class "tabs-tabgroup" ]
-                [ div [ class "tabs-tabgroup-headers" ]
-                    (tabs
-                        |> SelectedList.toTupleList
-                        |> List.map (tabHeader root)
-                    )
+                [ tabs
+                    |> SelectedList.toTupleList
+                    |> List.map (tabHeader root)
+                    |> div [ class "tabs-tabgroup-headers" ]
                     |> Html.map toMsg
                 , tabs
                     |> SelectedList.selected
@@ -179,10 +189,33 @@ viewSection toMsg root section =
                     , ( "tabs-divider--vertical", orientation == Vertical )
                     ]
                 ]
-                [ viewSection toMsg root s1
+                [ divider orientation percentage (viewSection toMsg root s1)
                 , div [ class "tabs-divider-line" ] []
-                , viewSection toMsg root s2
+                , divider orientation (100 - percentage) (viewSection toMsg root s2)
                 ]
+
+
+pc : Int -> String
+pc v =
+    toString v ++ "%"
+
+
+divider : Orientation -> Int -> Html msg -> Html msg
+divider orientation percentage content =
+    div
+        [ class "tabs-divider-division"
+        , style
+            [ ( case orientation of
+                    Horizontal ->
+                        "width"
+
+                    Vertical ->
+                        "height"
+              , pc percentage
+              )
+            ]
+        ]
+        [ content ]
 
 
 tabHeader : Root msg -> ( Bool, Tab msg ) -> Html (Msg msg)

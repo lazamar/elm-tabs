@@ -11278,26 +11278,67 @@ var _user$project$Tabs$viewTab = function (_p0) {
 			_1: {ctor: '[]'}
 		});
 };
+var _user$project$Tabs$pc = function (v) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		_elm_lang$core$Basics$toString(v),
+		'%');
+};
+var _user$project$Tabs$divider = F3(
+	function (orientation, percentage, content) {
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('tabs-divider-division'),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$style(
+						{
+							ctor: '::',
+							_0: {
+								ctor: '_Tuple2',
+								_0: function () {
+									var _p2 = orientation;
+									if (_p2.ctor === 'Horizontal') {
+										return 'width';
+									} else {
+										return 'height';
+									}
+								}(),
+								_1: _user$project$Tabs$pc(percentage)
+							},
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
+			},
+			{
+				ctor: '::',
+				_0: content,
+				_1: {ctor: '[]'}
+			});
+	});
 var _user$project$Tabs$sectionToList = function (section) {
-	var _p2 = section;
-	if (_p2.ctor === 'TabGroup') {
-		return _user$project$SelectedList$toList(_p2._0);
+	var _p3 = section;
+	if (_p3.ctor === 'TabGroup') {
+		return _user$project$SelectedList$toList(_p3._0);
 	} else {
 		return _elm_lang$core$List$concat(
 			{
 				ctor: '::',
-				_0: _user$project$Tabs$sectionToList(_p2._2),
+				_0: _user$project$Tabs$sectionToList(_p3._2),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Tabs$sectionToList(_p2._3),
+					_0: _user$project$Tabs$sectionToList(_p3._3),
 					_1: {ctor: '[]'}
 				}
 			});
 	}
 };
-var _user$project$Tabs$tabId = function (_p3) {
-	var _p4 = _p3;
-	return _p4._0.id;
+var _user$project$Tabs$tabId = function (_p4) {
+	var _p5 = _p4;
+	return _p5._0.id;
 };
 var _user$project$Tabs$TabConfig = F3(
 	function (a, b, c) {
@@ -11306,17 +11347,13 @@ var _user$project$Tabs$TabConfig = F3(
 var _user$project$Tabs$Model = function (a) {
 	return {ctor: 'Model', _0: a};
 };
-var _user$project$Tabs$init = function (toMsg) {
-	return _user$project$Tabs$Model(
-		{toMsg: toMsg, sections: _elm_lang$core$Maybe$Nothing});
-};
 var _user$project$Tabs$SelectTab = F2(
 	function (a, b) {
 		return {ctor: 'SelectTab', _0: a, _1: b};
 	});
 var _user$project$Tabs$tabHeader = F2(
-	function (root, _p5) {
-		var _p6 = _p5;
+	function (root, _p6) {
+		var _p7 = _p6;
 		return A2(
 			_elm_lang$html$Html$div,
 			{
@@ -11327,20 +11364,20 @@ var _user$project$Tabs$tabHeader = F2(
 						_0: {ctor: '_Tuple2', _0: 'tabs-tabgroup-header', _1: true},
 						_1: {
 							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'tabs-tabgroup-header--selected', _1: _p6._0},
+							_0: {ctor: '_Tuple2', _0: 'tabs-tabgroup-header--selected', _1: _p7._0},
 							_1: {ctor: '[]'}
 						}
 					}),
 				_1: {
 					ctor: '::',
 					_0: _elm_lang$html$Html_Events$onClick(
-						A2(_user$project$Tabs$SelectTab, root, _p6._1._0.id)),
+						A2(_user$project$Tabs$SelectTab, root, _p7._1._0.id)),
 					_1: {ctor: '[]'}
 				}
 			},
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html$text(_p6._1._0.title),
+				_0: _elm_lang$html$Html$text(_p7._1._0.title),
 				_1: {ctor: '[]'}
 			});
 	});
@@ -11348,9 +11385,9 @@ var _user$project$Tabs$Vertical = {ctor: 'Vertical'};
 var _user$project$Tabs$Horizontal = {ctor: 'Horizontal'};
 var _user$project$Tabs$viewSection = F3(
 	function (toMsg, root, section) {
-		var _p7 = section;
-		if (_p7.ctor === 'TabGroup') {
-			var _p8 = _p7._0;
+		var _p8 = section;
+		if (_p8.ctor === 'TabGroup') {
+			var _p9 = _p8._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				{
@@ -11373,16 +11410,17 @@ var _user$project$Tabs$viewSection = F3(
 							A2(
 								_elm_lang$core$List$map,
 								_user$project$Tabs$tabHeader(root),
-								_user$project$SelectedList$toTupleList(_p8)))),
+								_user$project$SelectedList$toTupleList(_p9)))),
 					_1: {
 						ctor: '::',
 						_0: _user$project$Tabs$viewTab(
-							_user$project$SelectedList$selected(_p8)),
+							_user$project$SelectedList$selected(_p9)),
 						_1: {ctor: '[]'}
 					}
 				});
 		} else {
-			var _p9 = _p7._0;
+			var _p11 = _p8._1;
+			var _p10 = _p8._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				{
@@ -11396,14 +11434,14 @@ var _user$project$Tabs$viewSection = F3(
 								_0: {
 									ctor: '_Tuple2',
 									_0: 'tabs-divider--horizontal',
-									_1: _elm_lang$core$Native_Utils.eq(_p9, _user$project$Tabs$Horizontal)
+									_1: _elm_lang$core$Native_Utils.eq(_p10, _user$project$Tabs$Horizontal)
 								},
 								_1: {
 									ctor: '::',
 									_0: {
 										ctor: '_Tuple2',
 										_0: 'tabs-divider--vertical',
-										_1: _elm_lang$core$Native_Utils.eq(_p9, _user$project$Tabs$Vertical)
+										_1: _elm_lang$core$Native_Utils.eq(_p10, _user$project$Tabs$Vertical)
 									},
 									_1: {ctor: '[]'}
 								}
@@ -11413,7 +11451,11 @@ var _user$project$Tabs$viewSection = F3(
 				},
 				{
 					ctor: '::',
-					_0: A3(_user$project$Tabs$viewSection, toMsg, root, _p7._2),
+					_0: A3(
+						_user$project$Tabs$divider,
+						_p10,
+						_p11,
+						A3(_user$project$Tabs$viewSection, toMsg, root, _p8._2)),
 					_1: {
 						ctor: '::',
 						_0: A2(
@@ -11426,7 +11468,11 @@ var _user$project$Tabs$viewSection = F3(
 							{ctor: '[]'}),
 						_1: {
 							ctor: '::',
-							_0: A3(_user$project$Tabs$viewSection, toMsg, root, _p7._3),
+							_0: A3(
+								_user$project$Tabs$divider,
+								_p10,
+								100 - _p11,
+								A3(_user$project$Tabs$viewSection, toMsg, root, _p8._3)),
 							_1: {ctor: '[]'}
 						}
 					}
@@ -11440,100 +11486,121 @@ var _user$project$Tabs$Divider = F4(
 var _user$project$Tabs$TabGroup = function (a) {
 	return {ctor: 'TabGroup', _0: a};
 };
+var _user$project$Tabs$init = function (toMsg) {
+	return _user$project$Tabs$Model(
+		{
+			toMsg: toMsg,
+			sections: _elm_lang$core$Maybe$Just(
+				A4(
+					_user$project$Tabs$Divider,
+					_user$project$Tabs$Horizontal,
+					40,
+					_user$project$Tabs$TabGroup(
+						_user$project$SelectedList$singleton('1')),
+					A4(
+						_user$project$Tabs$Divider,
+						_user$project$Tabs$Vertical,
+						60,
+						_user$project$Tabs$TabGroup(
+							_user$project$SelectedList$singleton('1')),
+						_user$project$Tabs$TabGroup(
+							_user$project$SelectedList$singleton('2')))))
+		});
+};
 var _user$project$Tabs$sectionMap = F2(
 	function (f, s) {
-		var _p10 = s;
-		if (_p10.ctor === 'TabGroup') {
+		var _p12 = s;
+		if (_p12.ctor === 'TabGroup') {
 			return _user$project$Tabs$TabGroup(
-				A2(_user$project$SelectedList$map, f, _p10._0));
+				A2(_user$project$SelectedList$map, f, _p12._0));
 		} else {
 			return A4(
 				_user$project$Tabs$Divider,
-				_p10._0,
-				_p10._1,
-				A2(_user$project$Tabs$sectionMap, f, _p10._2),
-				A2(_user$project$Tabs$sectionMap, f, _p10._3));
+				_p12._0,
+				_p12._1,
+				A2(_user$project$Tabs$sectionMap, f, _p12._2),
+				A2(_user$project$Tabs$sectionMap, f, _p12._3));
 		}
 	});
 var _user$project$Tabs$updateSections = F2(
-	function (_p12, _p11) {
-		var _p13 = _p12;
-		var _p14 = _p11;
+	function (_p14, _p13) {
+		var _p15 = _p14;
+		var _p16 = _p13;
 		return _user$project$Tabs$Model(
 			_elm_lang$core$Native_Utils.update(
-				_p14._0,
+				_p16._0,
 				{
 					sections: _elm_lang$core$Maybe$Just(
-						A2(_user$project$Tabs$sectionMap, _user$project$Tabs$tabId, _p13._0))
+						A2(_user$project$Tabs$sectionMap, _user$project$Tabs$tabId, _p15._0))
 				}));
 	});
 var _user$project$Tabs$sectionSelect = F2(
 	function (elem, section) {
-		var _p15 = section;
-		if (_p15.ctor === 'TabGroup') {
+		var _p17 = section;
+		if (_p17.ctor === 'TabGroup') {
 			return _user$project$Tabs$TabGroup(
-				A2(_user$project$SelectedList$select, _p15._0, elem));
+				A2(_user$project$SelectedList$select, _p17._0, elem));
 		} else {
 			return A4(
 				_user$project$Tabs$Divider,
-				_p15._0,
-				_p15._1,
-				A2(_user$project$Tabs$sectionSelect, elem, _p15._2),
-				A2(_user$project$Tabs$sectionSelect, elem, _p15._3));
+				_p17._0,
+				_p17._1,
+				A2(_user$project$Tabs$sectionSelect, elem, _p17._2),
+				A2(_user$project$Tabs$sectionSelect, elem, _p17._3));
 		}
 	});
 var _user$project$Tabs$selectTab = F2(
-	function (id, _p16) {
-		var _p17 = _p16;
-		var _p18 = _p17._0;
+	function (id, _p18) {
+		var _p19 = _p18;
+		var _p20 = _p19._0;
 		return _user$project$Tabs$Model(
 			_elm_lang$core$Native_Utils.update(
-				_p18,
+				_p20,
 				{
 					sections: A2(
 						_elm_lang$core$Maybe$map,
 						_user$project$Tabs$sectionSelect(id),
-						_p18.sections)
+						_p20.sections)
 				}));
 	});
 var _user$project$Tabs$update = F2(
 	function (msg, model) {
-		var _p19 = msg;
+		var _p21 = msg;
 		return A2(
 			_user$project$Tabs$selectTab,
-			_p19._1,
-			A2(_user$project$Tabs$updateSections, _p19._0, model));
+			_p21._1,
+			A2(_user$project$Tabs$updateSections, _p21._0, model));
 	});
 var _user$project$Tabs$fromSection = F2(
 	function (getTab, section) {
 		fromSection:
 		while (true) {
-			var _p20 = section;
-			if (_p20.ctor === 'TabGroup') {
-				var _p21 = A2(_user$project$SelectedList$filterMap, getTab, _p20._0);
-				if (_p21.ctor === 'Nothing') {
+			var _p22 = section;
+			if (_p22.ctor === 'TabGroup') {
+				var _p23 = A2(_user$project$SelectedList$filterMap, getTab, _p22._0);
+				if (_p23.ctor === 'Nothing') {
 					return _elm_lang$core$Maybe$Nothing;
 				} else {
 					return _elm_lang$core$Maybe$Just(
-						_user$project$Tabs$TabGroup(_p21._0));
+						_user$project$Tabs$TabGroup(_p23._0));
 				}
 			} else {
-				var _p25 = _p20._3;
-				var _p22 = A2(_user$project$Tabs$fromSection, getTab, _p20._2);
-				if (_p22.ctor === 'Nothing') {
-					var _v14 = getTab,
-						_v15 = _p25;
-					getTab = _v14;
-					section = _v15;
+				var _p27 = _p22._3;
+				var _p24 = A2(_user$project$Tabs$fromSection, getTab, _p22._2);
+				if (_p24.ctor === 'Nothing') {
+					var _v15 = getTab,
+						_v16 = _p27;
+					getTab = _v15;
+					section = _v16;
 					continue fromSection;
 				} else {
-					var _p24 = _p22._0;
-					var _p23 = A2(_user$project$Tabs$fromSection, getTab, _p25);
-					if (_p23.ctor === 'Nothing') {
-						return _elm_lang$core$Maybe$Just(_p24);
+					var _p26 = _p24._0;
+					var _p25 = A2(_user$project$Tabs$fromSection, getTab, _p27);
+					if (_p25.ctor === 'Nothing') {
+						return _elm_lang$core$Maybe$Just(_p26);
 					} else {
 						return _elm_lang$core$Maybe$Just(
-							A4(_user$project$Tabs$Divider, _p20._0, _p20._1, _p24, _p23._0));
+							A4(_user$project$Tabs$Divider, _p22._0, _p22._1, _p26, _p25._0));
 					}
 				}
 			}
@@ -11545,14 +11612,14 @@ var _user$project$Tabs$toLayout = F2(
 		var getTab = function (id) {
 			return A2(
 				_elm_community$list_extra$List_Extra$find,
-				function (_p26) {
+				function (_p28) {
 					return A2(
 						F2(
 							function (x, y) {
 								return _elm_lang$core$Native_Utils.eq(x, y);
 							}),
 						id,
-						_user$project$Tabs$tabId(_p26));
+						_user$project$Tabs$tabId(_p28));
 				},
 				tabsList);
 		};
@@ -11560,28 +11627,28 @@ var _user$project$Tabs$toLayout = F2(
 			_elm_lang$core$Maybe$andThen,
 			_user$project$Tabs$fromSection(getTab),
 			mids);
-		var _p27 = msection;
-		if (_p27.ctor === 'Nothing') {
+		var _p29 = msection;
+		if (_p29.ctor === 'Nothing') {
 			return _user$project$Tabs$TabGroup(
 				_user$project$SelectedList$fromNonempty(tabs));
 		} else {
-			var _p30 = _p27._0;
-			var sectionAsList = _user$project$Tabs$sectionToList(_p30);
+			var _p32 = _p29._0;
+			var sectionAsList = _user$project$Tabs$sectionToList(_p32);
 			var unordered = A2(
 				_elm_lang$core$Maybe$map,
 				_user$project$Tabs$TabGroup,
 				_user$project$SelectedList$fromList(
 					A2(
 						_elm_lang$core$List$filter,
-						function (_p28) {
-							return !A3(_elm_lang$core$Basics$flip, _elm_lang$core$List$member, sectionAsList, _p28);
+						function (_p30) {
+							return !A3(_elm_lang$core$Basics$flip, _elm_lang$core$List$member, sectionAsList, _p30);
 						},
 						_mgold$elm_nonempty_list$List_Nonempty$toList(tabs))));
-			var _p29 = unordered;
-			if (_p29.ctor === 'Nothing') {
-				return _p30;
+			var _p31 = unordered;
+			if (_p31.ctor === 'Nothing') {
+				return _p32;
 			} else {
-				return A4(_user$project$Tabs$Divider, _user$project$Tabs$Horizontal, 50, _p29._0, _p30);
+				return A4(_user$project$Tabs$Divider, _user$project$Tabs$Horizontal, 50, _p31._0, _p32);
 			}
 		}
 	});
@@ -11589,19 +11656,19 @@ var _user$project$Tabs$Root = function (a) {
 	return {ctor: 'Root', _0: a};
 };
 var _user$project$Tabs$view = F2(
-	function (_p31, tabs) {
-		var _p32 = _p31;
-		var _p33 = _p32._0;
+	function (_p33, tabs) {
+		var _p34 = _p33;
+		var _p35 = _p34._0;
 		return function (s) {
 			return A3(
 				_user$project$Tabs$viewSection,
-				_p33.toMsg,
+				_p35.toMsg,
 				_user$project$Tabs$Root(s),
 				s);
 		}(
 			A2(
 				_user$project$Tabs$toLayout,
-				A2(_elm_lang$core$Debug$log, 'sections', _p33.sections),
+				A2(_elm_lang$core$Debug$log, 'sections', _p35.sections),
 				tabs));
 	});
 var _user$project$Tabs$Tab = F2(
@@ -11669,7 +11736,16 @@ var _user$project$View$view = function (model) {
 		});
 	return A2(
 		_elm_lang$html$Html$div,
-		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$style(
+				{
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'height', _1: '100%'},
+					_1: {ctor: '[]'}
+				}),
+			_1: {ctor: '[]'}
+		},
 		{
 			ctor: '::',
 			_0: _elm_lang$html$Html$text('I\'m working!'),

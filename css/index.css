@@ -1,5 +1,7 @@
-body {
+html, body {
 	font-family: sans-serif;
+	height: 100%;
+	width: 100%;
 }
 
 .tabs {
@@ -7,12 +9,17 @@ body {
 }
 
 .tabs-tabgroup {
-
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-flow: column;
 }
 
 .tabs-tabgroup-headers {
 	display: flex;
 	flex-flow: row nowrap;
+	flex-grow: 0;
+	flex-shrink: 0;
 }
 
 .tabs-tabgroup-header {
@@ -32,4 +39,25 @@ body {
 
 .tabs-tabgroup-tab {
 	border: 2px solid #444;
+	flex-grow: 1;
+}
+
+.tabs-divider {
+	width: 100%;
+	height: 100%;
+	display: flex;
+}
+
+.tabs-divider--horizontal {
+	flex-flow: row nowrap;
+}
+
+.tabs-divider--vertical {
+	flex-flow: column nowrap;
+}
+
+
+.tabs-divider-division {
+	flex-grow: 0;
+	flex-shrink: 0;
 }

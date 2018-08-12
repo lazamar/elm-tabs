@@ -2,6 +2,7 @@ module View exposing (..)
 
 import Types exposing (..)
 import Html exposing (Html, div, text, h3)
+import Html.Attributes exposing (style)
 import Tabs
 import List.Nonempty as Nonempty
 
@@ -28,7 +29,7 @@ view model =
                 ]
     in
         div
-            []
+            [ style [ ( "height", "100%" ) ] ]
             [ text "I'm working!"
             , case mtabs of
                 Nothing ->
