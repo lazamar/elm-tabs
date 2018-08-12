@@ -63,6 +63,11 @@ type alias TabConfig msg =
 -- ======================
 
 
+tab : TabConfig msg -> (a -> Html msg) -> a -> Tab msg
+tab config view content =
+    Tab config (view content)
+
+
 init : (Msg -> msg) -> Model msg
 init toMsg =
     Model
@@ -86,18 +91,41 @@ update msg (Model { toMsg, sections }) =
 
 
 view : Model msg -> Nonempty (Tab msg) -> Html msg
-view model tabs =
-    div
-        [ class "tabs" ]
-        (tabs
-            |> Nonempty.map renderTab
-            |> Nonempty.toList
-        )
+view (Model model) tabs =
+    let
+        ordered =
+            toLayout model.sections tabs
+
+        orderedAsList =
+            sectionToList ordered
+
+        mUnorderedItems =
+            tabs
+                |> Nonempty.toList
+                |> List.filter (not << flip List.member orderedAsList)
+                |> Nonempty.fromList
+                |> Maybe.map SelectedList.fromNonempty
+                |> Maybe.map TabGroup
+
+        finalLayout =
+            case mUnorderedItems of
+                Just unordered ->
+                    Divider Horizontal 50 unordered ordered
+
+                Nothing ->
+                    ordered
+    in
+        viewSection model.toMsg finalLayout
 
 
-tab : TabConfig msg -> (a -> Html msg) -> a -> Tab msg
-tab config view content =
-    Tab config (view content)
+sectionToList : Section a -> List a
+sectionToList section =
+    case section of
+        TabGroup tabs ->
+            SelectedList.toList tabs
+
+        Divider _ _ s1 s2 ->
+            List.concat [ sectionToList s1, sectionToList s2 ]
 
 
 viewSection : (Msg -> msg) -> Section (Tab msg) -> Html msg
@@ -112,6 +140,9 @@ viewSection toMsg section =
                         |> List.map tabHeader
                     )
                     |> Html.map toMsg
+                , tabs
+                    |> SelectedList.selected
+                    |> viewTab
                 ]
 
         Divider orientation percentage s1 s2 ->
@@ -122,10 +153,10 @@ viewSection toMsg section =
                     , ( "tabs-divider--vertical", orientation == Vertical )
                     ]
                 ]
-                CONTINUE
-                FROM
-                HERE
-                []
+                [ viewSection toMsg s1
+                , div [ class "tabs-divider-line" ] []
+                , viewSection toMsg s2
+                ]
 
 
 tabHeader : ( Bool, Tab msg ) -> Html Msg
@@ -139,15 +170,20 @@ tabHeader ( selected, Tab { id, title } _ ) =
         [ text title ]
 
 
-renderTab : Tab msg -> Html msg
-renderTab (Tab config content) =
+viewTab : Tab msg -> Html msg
+viewTab (Tab config content) =
     div
-        [ class "tab" ]
-        [ div [ class "tab-title" ] [ text config.title ]
-        , div [ class "tab-content" ] [ content ]
+        [ class "tabs-tabgroup-tab" ]
+        [ content
         ]
 
 
+{-| We have a tree structure specifying how the tabs should be laid
+out int the view, but we don't know if all the tabs for which we
+have ids, are still being shown. Given a tree structure with IDS
+and some tabs, it will return a new tree structure with all tabs
+that match the IDs passed. T
+-}
 toLayout : Maybe (Section ID) -> Nonempty (Tab msg) -> Section (Tab msg)
 toLayout mids tabs =
     let

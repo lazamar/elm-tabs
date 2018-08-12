@@ -11109,46 +11109,55 @@ var _user$project$SelectedList$filterMap = F2(
 						})));
 		}
 	});
+var _user$project$SelectedList$filter = F2(
+	function (f, _p12) {
+		var _p13 = _p12;
+		var _p16 = _p13._1;
+		var _p15 = _p13._0;
+		var _p14 = _p13._2;
+		return f(_p16) ? _elm_lang$core$Maybe$Just(
+			A3(
+				_user$project$SelectedList$SelectedList,
+				A2(_elm_lang$core$List$filter, f, _p15),
+				_p16,
+				A2(_elm_lang$core$List$filter, f, _p14))) : _user$project$SelectedList$fromList(
+			A2(
+				_elm_lang$core$List$filter,
+				f,
+				_elm_lang$core$List$concat(
+					{
+						ctor: '::',
+						_0: _p15,
+						_1: {
+							ctor: '::',
+							_0: _p14,
+							_1: {ctor: '[]'}
+						}
+					})));
+	});
+var _user$project$SelectedList$map = F2(
+	function (f, _p17) {
+		var _p18 = _p17;
+		return A3(
+			_user$project$SelectedList$SelectedList,
+			A2(_elm_lang$core$List$map, f, _p18._0),
+			f(_p18._1),
+			A2(_elm_lang$core$List$map, f, _p18._2));
+	});
 
-var _user$project$Tabs$renderTab = function (_p0) {
+var _user$project$Tabs$viewTab = function (_p0) {
 	var _p1 = _p0;
 	return A2(
 		_elm_lang$html$Html$div,
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('tab'),
+			_0: _elm_lang$html$Html_Attributes$class('tabs-tabgroup-tab'),
 			_1: {ctor: '[]'}
 		},
 		{
 			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$div,
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('tab-title'),
-					_1: {ctor: '[]'}
-				},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p1._0.title),
-					_1: {ctor: '[]'}
-				}),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$div,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('tab-content'),
-						_1: {ctor: '[]'}
-					},
-					{
-						ctor: '::',
-						_0: _p1._1,
-						_1: {ctor: '[]'}
-					}),
-				_1: {ctor: '[]'}
-			}
+			_0: _p1._1,
+			_1: {ctor: '[]'}
 		});
 };
 var _user$project$Tabs$tabHeader = function (_p2) {
@@ -11175,18 +11184,23 @@ var _user$project$Tabs$tabHeader = function (_p2) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$Tabs$view = F2(
-	function (model, tabs) {
-		return A2(
-			_elm_lang$html$Html$div,
+var _user$project$Tabs$sectionToList = function (section) {
+	var _p4 = section;
+	if (_p4.ctor === 'TabGroup') {
+		return _user$project$SelectedList$toList(_p4._0);
+	} else {
+		return _elm_lang$core$List$concat(
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('tabs'),
-				_1: {ctor: '[]'}
-			},
-			_mgold$elm_nonempty_list$List_Nonempty$toList(
-				A2(_mgold$elm_nonempty_list$List_Nonempty$map, _user$project$Tabs$renderTab, tabs)));
-	});
+				_0: _user$project$Tabs$sectionToList(_p4._2),
+				_1: {
+					ctor: '::',
+					_0: _user$project$Tabs$sectionToList(_p4._3),
+					_1: {ctor: '[]'}
+				}
+			});
+	}
+};
 var _user$project$Tabs$TabConfig = F3(
 	function (a, b, c) {
 		return {id: a, title: b, onClose: c};
@@ -11199,10 +11213,10 @@ var _user$project$Tabs$init = function (toMsg) {
 		{toMsg: toMsg, sections: _elm_lang$core$Maybe$Nothing});
 };
 var _user$project$Tabs$update = F2(
-	function (msg, _p4) {
-		var _p5 = _p4;
+	function (msg, _p5) {
+		var _p6 = _p5;
 		return _user$project$Tabs$Model(
-			{toMsg: _p5._0.toMsg, sections: _p5._0.sections});
+			{toMsg: _p6._0.toMsg, sections: _p6._0.sections});
 	});
 var _user$project$Tabs$Close = function (a) {
 	return {ctor: 'Close', _0: a};
@@ -11211,8 +11225,9 @@ var _user$project$Tabs$Vertical = {ctor: 'Vertical'};
 var _user$project$Tabs$Horizontal = {ctor: 'Horizontal'};
 var _user$project$Tabs$viewSection = F2(
 	function (toMsg, section) {
-		var _p6 = section;
-		if (_p6.ctor === 'TabGroup') {
+		var _p7 = section;
+		if (_p7.ctor === 'TabGroup') {
+			var _p8 = _p7._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				{
@@ -11235,11 +11250,16 @@ var _user$project$Tabs$viewSection = F2(
 							A2(
 								_elm_lang$core$List$map,
 								_user$project$Tabs$tabHeader,
-								_user$project$SelectedList$toTupleList(_p6._0)))),
-					_1: {ctor: '[]'}
+								_user$project$SelectedList$toTupleList(_p8)))),
+					_1: {
+						ctor: '::',
+						_0: _user$project$Tabs$viewTab(
+							_user$project$SelectedList$selected(_p8)),
+						_1: {ctor: '[]'}
+					}
 				});
 		} else {
-			var _p7 = _p6._0;
+			var _p9 = _p7._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				{
@@ -11253,14 +11273,14 @@ var _user$project$Tabs$viewSection = F2(
 								_0: {
 									ctor: '_Tuple2',
 									_0: 'tabs-divider--horizontal',
-									_1: _elm_lang$core$Native_Utils.eq(_p7, _user$project$Tabs$Horizontal)
+									_1: _elm_lang$core$Native_Utils.eq(_p9, _user$project$Tabs$Horizontal)
 								},
 								_1: {
 									ctor: '::',
 									_0: {
 										ctor: '_Tuple2',
 										_0: 'tabs-divider--vertical',
-										_1: _elm_lang$core$Native_Utils.eq(_p7, _user$project$Tabs$Vertical)
+										_1: _elm_lang$core$Native_Utils.eq(_p9, _user$project$Tabs$Vertical)
 									},
 									_1: {ctor: '[]'}
 								}
@@ -11268,7 +11288,26 @@ var _user$project$Tabs$viewSection = F2(
 						}),
 					_1: {ctor: '[]'}
 				},
-				{ctor: '[]'});
+				{
+					ctor: '::',
+					_0: A2(_user$project$Tabs$viewSection, toMsg, _p7._2),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('tabs-divider-line'),
+								_1: {ctor: '[]'}
+							},
+							{ctor: '[]'}),
+						_1: {
+							ctor: '::',
+							_0: A2(_user$project$Tabs$viewSection, toMsg, _p7._3),
+							_1: {ctor: '[]'}
+						}
+					}
+				});
 		}
 	});
 var _user$project$Tabs$Divider = F4(
@@ -11282,32 +11321,32 @@ var _user$project$Tabs$fromSection = F2(
 	function (getTab, section) {
 		fromSection:
 		while (true) {
-			var _p8 = section;
-			if (_p8.ctor === 'TabGroup') {
-				var _p9 = A2(_user$project$SelectedList$filterMap, getTab, _p8._0);
-				if (_p9.ctor === 'Nothing') {
+			var _p10 = section;
+			if (_p10.ctor === 'TabGroup') {
+				var _p11 = A2(_user$project$SelectedList$filterMap, getTab, _p10._0);
+				if (_p11.ctor === 'Nothing') {
 					return _elm_lang$core$Maybe$Nothing;
 				} else {
 					return _elm_lang$core$Maybe$Just(
-						_user$project$Tabs$TabGroup(_p9._0));
+						_user$project$Tabs$TabGroup(_p11._0));
 				}
 			} else {
-				var _p13 = _p8._3;
-				var _p10 = A2(_user$project$Tabs$fromSection, getTab, _p8._2);
-				if (_p10.ctor === 'Nothing') {
-					var _v7 = getTab,
-						_v8 = _p13;
-					getTab = _v7;
-					section = _v8;
+				var _p15 = _p10._3;
+				var _p12 = A2(_user$project$Tabs$fromSection, getTab, _p10._2);
+				if (_p12.ctor === 'Nothing') {
+					var _v8 = getTab,
+						_v9 = _p15;
+					getTab = _v8;
+					section = _v9;
 					continue fromSection;
 				} else {
-					var _p12 = _p10._0;
-					var _p11 = A2(_user$project$Tabs$fromSection, getTab, _p13);
-					if (_p11.ctor === 'Nothing') {
-						return _elm_lang$core$Maybe$Just(_p12);
+					var _p14 = _p12._0;
+					var _p13 = A2(_user$project$Tabs$fromSection, getTab, _p15);
+					if (_p13.ctor === 'Nothing') {
+						return _elm_lang$core$Maybe$Just(_p14);
 					} else {
 						return _elm_lang$core$Maybe$Just(
-							A4(_user$project$Tabs$Divider, _p8._0, _p8._1, _p12, _p11._0));
+							A4(_user$project$Tabs$Divider, _p10._0, _p10._1, _p14, _p13._0));
 					}
 				}
 			}
@@ -11315,22 +11354,22 @@ var _user$project$Tabs$fromSection = F2(
 	});
 var _user$project$Tabs$toLayout = F2(
 	function (mids, tabs) {
-		var tabId = function (_p14) {
-			var _p15 = _p14;
-			return _p15._0.id;
+		var tabId = function (_p16) {
+			var _p17 = _p16;
+			return _p17._0.id;
 		};
 		var tabsList = _mgold$elm_nonempty_list$List_Nonempty$toList(tabs);
 		var getTab = function (id) {
 			return A2(
 				_elm_community$list_extra$List_Extra$find,
-				function (_p16) {
+				function (_p18) {
 					return A2(
 						F2(
 							function (x, y) {
 								return _elm_lang$core$Native_Utils.eq(x, y);
 							}),
 						id,
-						tabId(_p16));
+						tabId(_p18));
 				},
 				tabsList);
 		};
@@ -11338,13 +11377,42 @@ var _user$project$Tabs$toLayout = F2(
 			_elm_lang$core$Maybe$andThen,
 			_user$project$Tabs$fromSection(getTab),
 			mids);
-		var _p17 = msection;
-		if (_p17.ctor === 'Nothing') {
+		var _p19 = msection;
+		if (_p19.ctor === 'Nothing') {
 			return _user$project$Tabs$TabGroup(
 				_user$project$SelectedList$fromNonempty(tabs));
 		} else {
-			return _p17._0;
+			return _p19._0;
 		}
+	});
+var _user$project$Tabs$view = F2(
+	function (_p20, tabs) {
+		var _p21 = _p20;
+		var _p24 = _p21._0;
+		var ordered = A2(_user$project$Tabs$toLayout, _p24.sections, tabs);
+		var orderedAsList = _user$project$Tabs$sectionToList(ordered);
+		var mUnorderedItems = A2(
+			_elm_lang$core$Maybe$map,
+			_user$project$Tabs$TabGroup,
+			A2(
+				_elm_lang$core$Maybe$map,
+				_user$project$SelectedList$fromNonempty,
+				_mgold$elm_nonempty_list$List_Nonempty$fromList(
+					A2(
+						_elm_lang$core$List$filter,
+						function (_p22) {
+							return !A3(_elm_lang$core$Basics$flip, _elm_lang$core$List$member, orderedAsList, _p22);
+						},
+						_mgold$elm_nonempty_list$List_Nonempty$toList(tabs)))));
+		var finalLayout = function () {
+			var _p23 = mUnorderedItems;
+			if (_p23.ctor === 'Just') {
+				return A4(_user$project$Tabs$Divider, _user$project$Tabs$Horizontal, 50, _p23._0, ordered);
+			} else {
+				return ordered;
+			}
+		}();
+		return A2(_user$project$Tabs$viewSection, _p24.toMsg, finalLayout);
 	});
 var _user$project$Tabs$Tab = F2(
 	function (a, b) {

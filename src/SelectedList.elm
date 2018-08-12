@@ -102,3 +102,26 @@ filterMap f (SelectedList before selected after) =
                 |> List.concat
                 |> List.filterMap f
                 |> fromList
+
+
+filter : (a -> Bool) -> SelectedList a -> Maybe (SelectedList a)
+filter f (SelectedList before selected after) =
+    if f selected then
+        Just <|
+            SelectedList
+                (List.filter f before)
+                selected
+                (List.filter f after)
+    else
+        [ before, after ]
+            |> List.concat
+            |> List.filter f
+            |> fromList
+
+
+map : (a -> b) -> SelectedList a -> SelectedList b
+map f (SelectedList before selected after) =
+    SelectedList
+        (List.map f before)
+        (f selected)
+        (List.map f after)
