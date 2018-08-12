@@ -8,6 +8,8 @@ module SelectedList
         , toTupleList
         , select
         , selected
+        , map
+        , filter
         , filterMap
         )
 
@@ -73,7 +75,10 @@ select slist newSelected =
             SelectedList
                 (List.Extra.takeWhile ((/=) newSelected) list)
                 newSelected
-                (List.Extra.dropWhile ((/=) newSelected) list)
+                (list
+                    |> List.Extra.dropWhile ((/=) newSelected)
+                    |> List.drop 1
+                )
 
 
 selected : SelectedList a -> a

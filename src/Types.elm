@@ -10,4 +10,4 @@ type alias Model =
 
 type Msg
     = DoNothing
-    | TabsMsg Tabs.Msg
+    | TabsMsg (Tabs.Msg Msg)

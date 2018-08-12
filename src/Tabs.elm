@@ -2,6 +2,7 @@ module Tabs exposing (..)
 
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, classList)
+import Html.Events exposing (onClick)
 import SelectedList exposing (SelectedList)
 import List.Nonempty as Nonempty exposing (Nonempty)
 import List.Extra
@@ -19,13 +20,13 @@ import List.Extra
 
 type Model msg
     = Model
-        { toMsg : Msg -> msg
+        { toMsg : Msg msg -> msg
         , sections : Maybe (Section ID)
         }
 
 
 type Msg msg
-    = Close (Tab msg)
+    = SelectTab (Root msg) ID
 
 
 type alias ID =
@@ -44,6 +45,10 @@ type Orientation
 type Section a
     = TabGroup (SelectedList a)
     | Divider Orientation Percentage (Section a) (Section a)
+
+
+type Root a
+    = Root (Section (Tab a))
 
 
 type Tab msg
@@ -68,7 +73,7 @@ tab config view content =
     Tab config (view content)
 
 
-init : (Msg -> msg) -> Model msg
+init : (Msg msg -> msg) -> Model msg
 init toMsg =
     Model
         { toMsg = toMsg
@@ -76,46 +81,34 @@ init toMsg =
         }
 
 
-update : Msg -> Model msg -> Model msg
-update msg (Model { toMsg, sections }) =
-    Model
-        { toMsg = toMsg
-        , sections = sections
-        }
+update : Msg msg -> Model msg -> Model msg
+update msg model =
+    case msg of
+        SelectTab root id ->
+            model
+                |> updateSections root
+                |> selectTab id
+
+
+updateSections : Root msg -> Model msg -> Model msg
+updateSections (Root section) (Model model) =
+    Model { model | sections = Just <| sectionMap tabId section }
+
+
+selectTab : ID -> Model msg -> Model msg
+selectTab id (Model model) =
+    Model { model | sections = model.sections |> Maybe.map (sectionSelect id) }
+
+
+tabId : Tab a -> ID
+tabId (Tab { id } _) =
+    id
 
 
 
 -- ======================
--- VIEW
+-- SECTION
 -- ======================
-
-
-view : Model msg -> Nonempty (Tab msg) -> Html msg
-view (Model model) tabs =
-    let
-        ordered =
-            toLayout model.sections tabs
-
-        orderedAsList =
-            sectionToList ordered
-
-        mUnorderedItems =
-            tabs
-                |> Nonempty.toList
-                |> List.filter (not << flip List.member orderedAsList)
-                |> Nonempty.fromList
-                |> Maybe.map SelectedList.fromNonempty
-                |> Maybe.map TabGroup
-
-        finalLayout =
-            case mUnorderedItems of
-                Just unordered ->
-                    Divider Horizontal 50 unordered ordered
-
-                Nothing ->
-                    ordered
-    in
-        viewSection model.toMsg finalLayout
 
 
 sectionToList : Section a -> List a
@@ -128,8 +121,41 @@ sectionToList section =
             List.concat [ sectionToList s1, sectionToList s2 ]
 
 
-viewSection : (Msg -> msg) -> Section (Tab msg) -> Html msg
-viewSection toMsg section =
+sectionMap : (a -> b) -> Section a -> Section b
+sectionMap f s =
+    case s of
+        TabGroup tabs ->
+            TabGroup (SelectedList.map f tabs)
+
+        Divider orientation percentage s1 s2 ->
+            Divider orientation percentage (sectionMap f s1) (sectionMap f s2)
+
+
+sectionSelect : a -> Section a -> Section a
+sectionSelect elem section =
+    case section of
+        TabGroup tabs ->
+            TabGroup <| SelectedList.select tabs elem
+
+        Divider orientation percentage s1 s2 ->
+            Divider orientation percentage (sectionSelect elem s1) (sectionSelect elem s2)
+
+
+
+-- ======================
+-- VIEW
+-- ======================
+
+
+view : Model msg -> Nonempty (Tab msg) -> Html msg
+view (Model model) tabs =
+    tabs
+        |> toLayout (Debug.log "sections" model.sections)
+        |> (\s -> viewSection model.toMsg (Root s) s)
+
+
+viewSection : (Msg msg -> msg) -> Root msg -> Section (Tab msg) -> Html msg
+viewSection toMsg root section =
     case section of
         TabGroup tabs ->
             div
@@ -137,7 +163,7 @@ viewSection toMsg section =
                 [ div [ class "tabs-tabgroup-headers" ]
                     (tabs
                         |> SelectedList.toTupleList
-                        |> List.map tabHeader
+                        |> List.map (tabHeader root)
                     )
                     |> Html.map toMsg
                 , tabs
@@ -153,19 +179,20 @@ viewSection toMsg section =
                     , ( "tabs-divider--vertical", orientation == Vertical )
                     ]
                 ]
-                [ viewSection toMsg s1
+                [ viewSection toMsg root s1
                 , div [ class "tabs-divider-line" ] []
-                , viewSection toMsg s2
+                , viewSection toMsg root s2
                 ]
 
 
-tabHeader : ( Bool, Tab msg ) -> Html Msg
-tabHeader ( selected, Tab { id, title } _ ) =
+tabHeader : Root msg -> ( Bool, Tab msg ) -> Html (Msg msg)
+tabHeader root ( selected, Tab { id, title } _ ) =
     div
         [ classList
             [ ( "tabs-tabgroup-header", True )
             , ( "tabs-tabgroup-header--selected", selected )
             ]
+        , onClick (SelectTab root id)
         ]
         [ text title ]
 
@@ -190,9 +217,6 @@ toLayout mids tabs =
         tabsList =
             Nonempty.toList tabs
 
-        tabId (Tab { id } _) =
-            id
-
         getTab id =
             List.Extra.find (tabId >> (==) id) tabsList
 
@@ -204,7 +228,26 @@ toLayout mids tabs =
                 TabGroup (SelectedList.fromNonempty tabs)
 
             Just section ->
-                section
+                let
+                    sectionAsList =
+                        sectionToList section
+
+                    unordered =
+                        tabs
+                            |> Nonempty.toList
+                            |> List.filter (not << flip List.member sectionAsList)
+                            |> SelectedList.fromList
+                            |> Maybe.map TabGroup
+                in
+                    case unordered of
+                        Nothing ->
+                            -- Everything is laid out in sections
+                            section
+
+                        Just usection ->
+                            -- There are new tabs that still don't have
+                            -- been included in the sections layout
+                            Divider Horizontal 50 usection section
 
 
 fromSection : (ID -> Maybe (Tab msg)) -> Section ID -> Maybe (Section (Tab msg))
