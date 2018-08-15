@@ -26,6 +26,14 @@ view model =
                     }
                     showSecond
                     2
+
+                --, Tabs.tab
+                --    { id = "3"
+                --    , title = "Third tab"
+                --    , onClose = DoNothing
+                --    }
+                --    showThird
+                --    True
                 ]
     in
         div
@@ -48,3 +56,8 @@ showFirst someText =
 showSecond : Int -> Html Msg
 showSecond number =
     h3 [] [ text <| "The number is " ++ toString number ]
+
+
+showThird : Bool -> Html Msg
+showThird v =
+    text <| "THIRD TAB: The value is " ++ toString v

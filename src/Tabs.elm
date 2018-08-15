@@ -21,19 +21,46 @@ import List.Extra
 type Model msg
     = Model
         { toMsg : Msg msg -> msg
-        , sections : Maybe (Section ID)
+        , sections : Maybe (Section TabId)
+
+        -- Each section divider has an TabId.
+        , lastDividerId : DividerId
         }
 
 
 type Msg msg
-    = SelectTab (Root msg) ID
+    = SelectTab (Root msg) TabId
 
 
-type alias ID =
+
+-- TAB
+
+
+type alias TabId =
     String
 
 
-type alias Percentage =
+type Tab msg
+    = Tab (TabConfig msg) (Html msg)
+
+
+type alias TabConfig msg =
+    { id : TabId
+    , title : String
+    , onClose : msg
+    }
+
+
+
+-- SECTION
+
+
+type Section a
+    = TabGroup (SelectedList a)
+    | Divider DividerInfo (Section a) (Section a)
+
+
+type alias DividerId =
     Int
 
 
@@ -42,24 +69,20 @@ type Orientation
     | Vertical
 
 
-type Section a
-    = TabGroup (SelectedList a)
-    | Divider Orientation Percentage (Section a) (Section a)
+type alias DividerInfo =
+    { id : DividerId
+    , orientation : Orientation
+
+    -- Distance in pixels between the middle of
+    -- the divider element and the divider's division line
+    , offset : Int
+    }
 
 
+{-| Represents the root of the section tree
+-}
 type Root a
     = Root (Section (Tab a))
-
-
-type Tab msg
-    = Tab (TabConfig msg) (Html msg)
-
-
-type alias TabConfig msg =
-    { id : ID
-    , title : String
-    , onClose : msg
-    }
 
 
 
@@ -80,15 +103,20 @@ init toMsg =
         , sections =
             Just <|
                 Divider
-                    Horizontal
-                    40
+                    { id = 2
+                    , orientation = Horizontal
+                    , offset = 40
+                    }
                     (TabGroup <| SelectedList.singleton "1")
                     (Divider
-                        Vertical
-                        60
+                        { id = 3
+                        , orientation = Vertical
+                        , offset = 60
+                        }
                         (TabGroup <| SelectedList.singleton "1")
                         (TabGroup <| SelectedList.singleton "2")
                     )
+        , lastDividerId = 0
         }
 
 
@@ -106,12 +134,12 @@ updateSections (Root section) (Model model) =
     Model { model | sections = Just <| sectionMap tabId section }
 
 
-selectTab : ID -> Model msg -> Model msg
+selectTab : TabId -> Model msg -> Model msg
 selectTab id (Model model) =
     Model { model | sections = model.sections |> Maybe.map (sectionSelect id) }
 
 
-tabId : Tab a -> ID
+tabId : Tab a -> TabId
 tabId (Tab { id } _) =
     id
 
@@ -128,7 +156,7 @@ sectionToList section =
         TabGroup tabs ->
             SelectedList.toList tabs
 
-        Divider _ _ s1 s2 ->
+        Divider _ s1 s2 ->
             List.concat [ sectionToList s1, sectionToList s2 ]
 
 
@@ -138,8 +166,8 @@ sectionMap f s =
         TabGroup tabs ->
             TabGroup (SelectedList.map f tabs)
 
-        Divider orientation percentage s1 s2 ->
-            Divider orientation percentage (sectionMap f s1) (sectionMap f s2)
+        Divider info s1 s2 ->
+            Divider info (sectionMap f s1) (sectionMap f s2)
 
 
 sectionSelect : a -> Section a -> Section a
@@ -148,8 +176,8 @@ sectionSelect elem section =
         TabGroup tabs ->
             TabGroup <| SelectedList.select tabs elem
 
-        Divider orientation percentage s1 s2 ->
-            Divider orientation percentage (sectionSelect elem s1) (sectionSelect elem s2)
+        Divider info s1 s2 ->
+            Divider info (sectionSelect elem s1) (sectionSelect elem s2)
 
 
 
@@ -161,7 +189,7 @@ sectionSelect elem section =
 view : Model msg -> Nonempty (Tab msg) -> Html msg
 view (Model model) tabs =
     tabs
-        |> toLayout (Debug.log "sections" model.sections)
+        |> toSections model.sections
         |> (\s -> viewSection model.toMsg (Root s) s)
 
 
@@ -181,7 +209,7 @@ viewSection toMsg root section =
                     |> viewTab
                 ]
 
-        Divider orientation percentage s1 s2 ->
+        Divider { orientation, offset } s1 s2 ->
             div
                 [ classList
                     [ ( "tabs-divider", True )
@@ -189,19 +217,14 @@ viewSection toMsg root section =
                     , ( "tabs-divider--vertical", orientation == Vertical )
                     ]
                 ]
-                [ divider orientation percentage (viewSection toMsg root s1)
+                [ division orientation offset (viewSection toMsg root s1)
                 , div [ class "tabs-divider-line" ] []
-                , divider orientation (100 - percentage) (viewSection toMsg root s2)
+                , division orientation (-offset) (viewSection toMsg root s2)
                 ]
 
 
-pc : Int -> String
-pc v =
-    toString v ++ "%"
-
-
-divider : Orientation -> Int -> Html msg -> Html msg
-divider orientation percentage content =
+division : Orientation -> Int -> Html msg -> Html msg
+division orientation offset content =
     div
         [ class "tabs-divider-division"
         , style
@@ -211,7 +234,7 @@ divider orientation percentage content =
 
                     Vertical ->
                         "height"
-              , pc percentage
+              , "calc(50% + " ++ toString offset ++ "px)"
               )
             ]
         ]
@@ -244,8 +267,8 @@ have ids, are still being shown. Given a tree structure with IDS
 and some tabs, it will return a new tree structure with all tabs
 that match the IDs passed. T
 -}
-toLayout : Maybe (Section ID) -> Nonempty (Tab msg) -> Section (Tab msg)
-toLayout mids tabs =
+toSections : Maybe (Section TabId) -> Nonempty (Tab msg) -> Section (Tab msg)
+toSections mids tabs =
     let
         tabsList =
             Nonempty.toList tabs
@@ -280,10 +303,10 @@ toLayout mids tabs =
                         Just usection ->
                             -- There are new tabs that still don't have
                             -- been included in the sections layout
-                            Divider Horizontal 50 usection section
+                            Divider { id = 2, orientation = Horizontal, offset = 0 } usection section
 
 
-fromSection : (ID -> Maybe (Tab msg)) -> Section ID -> Maybe (Section (Tab msg))
+fromSection : (TabId -> Maybe (Tab msg)) -> Section TabId -> Maybe (Section (Tab msg))
 fromSection getTab section =
     case section of
         TabGroup idList ->
@@ -294,7 +317,7 @@ fromSection getTab section =
                 Just tabs ->
                     Just <| TabGroup tabs
 
-        Divider orientation percentage s1 s2 ->
+        Divider info s1 s2 ->
             case fromSection getTab s1 of
                 Nothing ->
                     fromSection getTab s2
@@ -305,4 +328,4 @@ fromSection getTab section =
                             Just content1
 
                         Just content2 ->
-                            Just <| Divider orientation percentage content1 content2
+                            Just <| Divider info content1 content2
