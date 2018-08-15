@@ -1,6 +1,6 @@
-module SelectedList
+module Tabs.SelectList
     exposing
-        ( SelectedList
+        ( SelectList
         , singleton
         , fromList
         , fromNonempty
@@ -25,37 +25,37 @@ import List.Nonempty as Nonempty exposing (Nonempty)
 -}
 
 
-type SelectedList a
-    = SelectedList (List a) a (List a)
+type SelectList a
+    = SelectList (List a) a (List a)
 
 
-singleton : a -> SelectedList a
+singleton : a -> SelectList a
 singleton v =
-    SelectedList [] v []
+    SelectList [] v []
 
 
-fromList : List a -> Maybe (SelectedList a)
+fromList : List a -> Maybe (SelectList a)
 fromList l =
     case List.head l of
         Nothing ->
             Nothing
 
         Just a ->
-            Just <| SelectedList [] a (List.drop 1 l)
+            Just <| SelectList [] a (List.drop 1 l)
 
 
-fromNonempty : Nonempty a -> SelectedList a
+fromNonempty : Nonempty a -> SelectList a
 fromNonempty nlist =
-    SelectedList [] (Nonempty.head nlist) (Nonempty.tail nlist)
+    SelectList [] (Nonempty.head nlist) (Nonempty.tail nlist)
 
 
-toList : SelectedList a -> List a
-toList (SelectedList before selected after) =
+toList : SelectList a -> List a
+toList (SelectList before selected after) =
     List.concat [ before, [ selected ], after ]
 
 
-toTupleList : SelectedList a -> List ( Bool, a )
-toTupleList (SelectedList before selected after) =
+toTupleList : SelectList a -> List ( Bool, a )
+toTupleList (SelectList before selected after) =
     List.concat
         [ List.map (\a -> ( False, a )) before
         , [ ( True, selected ) ]
@@ -63,8 +63,8 @@ toTupleList (SelectedList before selected after) =
         ]
 
 
-select : SelectedList a -> a -> SelectedList a
-select slist newSelected =
+select : a -> SelectList a -> SelectList a
+select newSelected slist =
     let
         list =
             toList slist
@@ -72,7 +72,7 @@ select slist newSelected =
         if not <| List.member newSelected list then
             slist
         else
-            SelectedList
+            SelectList
                 (List.Extra.takeWhile ((/=) newSelected) list)
                 newSelected
                 (list
@@ -81,8 +81,8 @@ select slist newSelected =
                 )
 
 
-selected : SelectedList a -> a
-selected (SelectedList _ s _) =
+selected : SelectList a -> a
+selected (SelectList _ s _) =
     s
 
 
@@ -92,12 +92,12 @@ becomes selected.
 If all elements are filtered out, the result is Nothing
 
 -}
-filterMap : (a -> Maybe b) -> SelectedList a -> Maybe (SelectedList b)
-filterMap f (SelectedList before selected after) =
+filterMap : (a -> Maybe b) -> SelectList a -> Maybe (SelectList b)
+filterMap f (SelectList before selected after) =
     case f selected of
         Just v ->
             Just <|
-                SelectedList
+                SelectList
                     (List.filterMap f before)
                     v
                     (List.filterMap f after)
@@ -109,11 +109,11 @@ filterMap f (SelectedList before selected after) =
                 |> fromList
 
 
-filter : (a -> Bool) -> SelectedList a -> Maybe (SelectedList a)
-filter f (SelectedList before selected after) =
+filter : (a -> Bool) -> SelectList a -> Maybe (SelectList a)
+filter f (SelectList before selected after) =
     if f selected then
         Just <|
-            SelectedList
+            SelectList
                 (List.filter f before)
                 selected
                 (List.filter f after)
@@ -124,9 +124,9 @@ filter f (SelectedList before selected after) =
             |> fromList
 
 
-map : (a -> b) -> SelectedList a -> SelectedList b
-map f (SelectedList before selected after) =
-    SelectedList
+map : (a -> b) -> SelectList a -> SelectList b
+map f (SelectList before selected after) =
+    SelectList
         (List.map f before)
         (f selected)
         (List.map f after)

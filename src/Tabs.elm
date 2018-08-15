@@ -3,9 +3,16 @@ module Tabs exposing (..)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class, classList, style)
 import Html.Events exposing (onClick)
-import SelectedList exposing (SelectedList)
+import Tabs.SelectList as SelectList exposing (SelectList)
 import List.Nonempty as Nonempty exposing (Nonempty)
 import List.Extra
+import Tabs.Section as Section
+    exposing
+        ( Section
+        , Orientation(Vertical, Horizontal)
+        , DividerInfo
+        )
+import Tabs.Tree as Tree exposing (Tree(Node, Leaf))
 
 
 {-
@@ -22,61 +29,11 @@ type Model msg
     = Model
         { toMsg : Msg msg -> msg
         , sections : Maybe (Section TabId)
-
-        -- Each section divider has an TabId.
-        , lastDividerId : DividerId
         }
 
 
 type Msg msg
     = SelectTab (Root msg) TabId
-
-
-
--- TAB
-
-
-type alias TabId =
-    String
-
-
-type Tab msg
-    = Tab (TabConfig msg) (Html msg)
-
-
-type alias TabConfig msg =
-    { id : TabId
-    , title : String
-    , onClose : msg
-    }
-
-
-
--- SECTION
-
-
-type Section a
-    = TabGroup (SelectedList a)
-    | Divider DividerInfo (Section a) (Section a)
-
-
-type alias DividerId =
-    Int
-
-
-type Orientation
-    = Horizontal
-    | Vertical
-
-
-type alias DividerInfo =
-    { id : DividerId
-    , orientation : Orientation
-
-    -- Distance in pixels between the middle of
-    -- the divider element and the divider's division line
-    , offset : Int
-    }
 
 
 {-| Represents the root of the section tree
@@ -85,15 +42,22 @@ type Root a
     = Root (Section (Tab a))
 
 
+type alias Tab msg =
+    { id : TabId
+    , title : String
+    , onClose : msg
+    , content : Html msg
+    }
+
+
+type alias TabId =
+    String
+
+
 
 -- ======================
 -- STATE
 -- ======================
-
-
-tab : TabConfig msg -> (a -> Html msg) -> a -> Tab msg
-tab config view content =
-    Tab config (view content)
 
 
 init : (Msg msg -> msg) -> Model msg
@@ -102,21 +66,18 @@ init toMsg =
         { toMsg = toMsg
         , sections =
             Just <|
-                Divider
-                    { id = 2
-                    , orientation = Horizontal
+                Node
+                    { orientation = Horizontal
                     , offset = 40
                     }
-                    (TabGroup <| SelectedList.singleton "1")
-                    (Divider
-                        { id = 3
-                        , orientation = Vertical
+                    (Leaf <| SelectList.singleton "1")
+                    (Node
+                        { orientation = Vertical
                         , offset = 60
                         }
-                        (TabGroup <| SelectedList.singleton "1")
-                        (TabGroup <| SelectedList.singleton "2")
+                        (Leaf <| SelectList.singleton "1")
+                        (Leaf <| SelectList.singleton "2")
                     )
-        , lastDividerId = 0
         }
 
 
@@ -131,53 +92,12 @@ update msg model =
 
 updateSections : Root msg -> Model msg -> Model msg
 updateSections (Root section) (Model model) =
-    Model { model | sections = Just <| sectionMap tabId section }
+    Model { model | sections = Just <| Section.map .id section }
 
 
 selectTab : TabId -> Model msg -> Model msg
 selectTab id (Model model) =
-    Model { model | sections = model.sections |> Maybe.map (sectionSelect id) }
-
-
-tabId : Tab a -> TabId
-tabId (Tab { id } _) =
-    id
-
-
-
--- ======================
--- SECTION
--- ======================
-
-
-sectionToList : Section a -> List a
-sectionToList section =
-    case section of
-        TabGroup tabs ->
-            SelectedList.toList tabs
-
-        Divider _ s1 s2 ->
-            List.concat [ sectionToList s1, sectionToList s2 ]
-
-
-sectionMap : (a -> b) -> Section a -> Section b
-sectionMap f s =
-    case s of
-        TabGroup tabs ->
-            TabGroup (SelectedList.map f tabs)
-
-        Divider info s1 s2 ->
-            Divider info (sectionMap f s1) (sectionMap f s2)
-
-
-sectionSelect : a -> Section a -> Section a
-sectionSelect elem section =
-    case section of
-        TabGroup tabs ->
-            TabGroup <| SelectedList.select tabs elem
-
-        Divider info s1 s2 ->
-            Divider info (sectionSelect elem s1) (sectionSelect elem s2)
+    Model { model | sections = model.sections |> Maybe.map (Section.select id) }
 
 
 
@@ -195,32 +115,40 @@ view (Model model) tabs =
 
 viewSection : (Msg msg -> msg) -> Root msg -> Section (Tab msg) -> Html msg
 viewSection toMsg root section =
-    case section of
-        TabGroup tabs ->
-            div
-                [ class "tabs-tabgroup" ]
-                [ tabs
-                    |> SelectedList.toTupleList
-                    |> List.map (tabHeader root)
-                    |> div [ class "tabs-tabgroup-headers" ]
-                    |> Html.map toMsg
-                , tabs
-                    |> SelectedList.selected
-                    |> viewTab
-                ]
+    Section.toHtml
+        (viewDivider toMsg root)
+        (viewTabGroup toMsg root)
+        section
 
-        Divider { orientation, offset } s1 s2 ->
-            div
-                [ classList
-                    [ ( "tabs-divider", True )
-                    , ( "tabs-divider--horizontal", orientation == Horizontal )
-                    , ( "tabs-divider--vertical", orientation == Vertical )
-                    ]
-                ]
-                [ division orientation offset (viewSection toMsg root s1)
-                , div [ class "tabs-divider-line" ] []
-                , division orientation (-offset) (viewSection toMsg root s2)
-                ]
+
+viewTabGroup : (Msg msg -> msg) -> Root msg -> SelectList (Tab msg) -> Html msg
+viewTabGroup toMsg root tabs =
+    div
+        [ class "tabs-tabgroup" ]
+        [ tabs
+            |> SelectList.toTupleList
+            |> List.map (tabHeader root)
+            |> div [ class "tabs-tabgroup-headers" ]
+            |> Html.map toMsg
+        , tabs
+            |> SelectList.selected
+            |> viewTab
+        ]
+
+
+viewDivider : (Msg msg -> msg) -> Root msg -> Int -> DividerInfo -> Html msg -> Html msg -> Html msg
+viewDivider toMsg root idx { orientation, offset } s1 s2 =
+    div
+        [ classList
+            [ ( "tabs-divider", True )
+            , ( "tabs-divider--horizontal", orientation == Horizontal )
+            , ( "tabs-divider--vertical", orientation == Vertical )
+            ]
+        ]
+        [ division orientation offset s1
+        , div [ class "tabs-divider-line" ] []
+        , division orientation (-offset) s2
+        ]
 
 
 division : Orientation -> Int -> Html msg -> Html msg
@@ -242,7 +170,7 @@ division orientation offset content =
 
 
 tabHeader : Root msg -> ( Bool, Tab msg ) -> Html (Msg msg)
-tabHeader root ( selected, Tab { id, title } _ ) =
+tabHeader root ( selected, { id, title } ) =
     div
         [ classList
             [ ( "tabs-tabgroup-header", True )
@@ -254,78 +182,63 @@ tabHeader root ( selected, Tab { id, title } _ ) =
 
 
 viewTab : Tab msg -> Html msg
-viewTab (Tab config content) =
+viewTab tab =
     div
         [ class "tabs-tabgroup-tab" ]
-        [ content
-        ]
+        [ tab.content ]
 
 
 {-| We have a tree structure specifying how the tabs should be laid
 out int the view, but we don't know if all the tabs for which we
 have ids, are still being shown. Given a tree structure with IDS
 and some tabs, it will return a new tree structure with all tabs
-that match the IDs passed. T
+that match the IDs passed.
+
+If there are new tabs (tabs that are not in the structure with ids)
+these will be inserted as a new section at the root
+
 -}
 toSections : Maybe (Section TabId) -> Nonempty (Tab msg) -> Section (Tab msg)
 toSections mids tabs =
     let
+        -- tabs whose layout is specified in mids
+        mordered =
+            Maybe.andThen (Section.filterMap getTab) mids
+
+        getTab id =
+            List.Extra.find (.id >> (==) id) tabsList
+
         tabsList =
             Nonempty.toList tabs
 
-        getTab id =
-            List.Extra.find (tabId >> (==) id) tabsList
+        -- New tabs. Those that are not in our organised ids
+        munordered =
+            tabs
+                |> Nonempty.toList
+                |> List.filter (not << flip List.member orderedAsList)
+                |> Nonempty.fromList
+                |> Maybe.map Section.tabsGroup
 
-        msection =
-            Maybe.andThen (fromSection getTab) mids
+        orderedAsList =
+            mordered
+                |> Maybe.map Section.toList
+                |> Maybe.withDefault []
     in
-        case msection of
+        case mordered of
             Nothing ->
-                TabGroup (SelectedList.fromNonempty tabs)
+                -- All tabs are new
+                Section.tabsGroup tabs
 
-            Just section ->
-                let
-                    sectionAsList =
-                        sectionToList section
+            Just ordered ->
+                case munordered of
+                    Nothing ->
+                        -- No new tabs, everything was already laid out in sections
+                        ordered
 
-                    unordered =
-                        tabs
-                            |> Nonempty.toList
-                            |> List.filter (not << flip List.member sectionAsList)
-                            |> SelectedList.fromList
-                            |> Maybe.map TabGroup
-                in
-                    case unordered of
-                        Nothing ->
-                            -- Everything is laid out in sections
-                            section
-
-                        Just usection ->
-                            -- There are new tabs that still don't have
-                            -- been included in the sections layout
-                            Divider { id = 2, orientation = Horizontal, offset = 0 } usection section
-
-
-fromSection : (TabId -> Maybe (Tab msg)) -> Section TabId -> Maybe (Section (Tab msg))
-fromSection getTab section =
-    case section of
-        TabGroup idList ->
-            case SelectedList.filterMap getTab idList of
-                Nothing ->
-                    Nothing
-
-                Just tabs ->
-                    Just <| TabGroup tabs
-
-        Divider info s1 s2 ->
-            case fromSection getTab s1 of
-                Nothing ->
-                    fromSection getTab s2
-
-                Just content1 ->
-                    case fromSection getTab s2 of
-                        Nothing ->
-                            Just content1
-
-                        Just content2 ->
-                            Just <| Divider info content1 content2
+                    Just unordered ->
+                        -- Some tabs were already laid out and
+                        -- there are new ones as well
+                        Section.divider
+                            { orientation = Horizontal, offset = 0 }
+                            unordered
+                            ordered

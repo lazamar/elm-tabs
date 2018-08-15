@@ -12,28 +12,21 @@ view model =
     let
         mtabs =
             Nonempty.fromList
-                [ Tabs.tab
-                    { id = "1"
-                    , title = "First Tab"
-                    , onClose = DoNothing
-                    }
-                    showFirst
-                    "Here is some content"
-                , Tabs.tab
-                    { id = "2"
-                    , title = "Second tab"
-                    , onClose = DoNothing
-                    }
-                    showSecond
-                    2
-
-                --, Tabs.tab
-                --    { id = "3"
-                --    , title = "Third tab"
-                --    , onClose = DoNothing
-                --    }
-                --    showThird
-                --    True
+                [ { id = "1"
+                  , title = "First Tab"
+                  , onClose = DoNothing
+                  , content = showFirst "Here is some content"
+                  }
+                , { id = "2"
+                  , title = "Second tab"
+                  , onClose = DoNothing
+                  , content = showSecond 2
+                  }
+                , { id = "3"
+                  , title = "Third tab"
+                  , onClose = DoNothing
+                  , content = showThird True
+                  }
                 ]
     in
         div
