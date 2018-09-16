@@ -11153,16 +11153,25 @@ var _user$project$Tabs_SelectList$singleton = function (v) {
 		v,
 		{ctor: '[]'});
 };
+var _user$project$Tabs_SelectList$cons = F2(
+	function (a, _p6) {
+		var _p7 = _p6;
+		return A3(
+			_user$project$Tabs_SelectList$SelectList,
+			{ctor: '::', _0: a, _1: _p7._0},
+			_p7._1,
+			_p7._2);
+	});
 var _user$project$Tabs_SelectList$fromList = function (l) {
-	var _p6 = _elm_lang$core$List$head(l);
-	if (_p6.ctor === 'Nothing') {
+	var _p8 = _elm_lang$core$List$head(l);
+	if (_p8.ctor === 'Nothing') {
 		return _elm_lang$core$Maybe$Nothing;
 	} else {
 		return _elm_lang$core$Maybe$Just(
 			A3(
 				_user$project$Tabs_SelectList$SelectList,
 				{ctor: '[]'},
-				_p6._0,
+				_p8._0,
 				A2(_elm_lang$core$List$drop, 1, l)));
 	}
 };
@@ -11198,18 +11207,18 @@ var _user$project$Tabs_SelectList$select = F2(
 					list)));
 	});
 var _user$project$Tabs_SelectList$filterMap = F2(
-	function (f, _p7) {
-		var _p8 = _p7;
-		var _p11 = _p8._0;
-		var _p10 = _p8._2;
-		var _p9 = f(_p8._1);
-		if (_p9.ctor === 'Just') {
+	function (f, _p9) {
+		var _p10 = _p9;
+		var _p13 = _p10._0;
+		var _p12 = _p10._2;
+		var _p11 = f(_p10._1);
+		if (_p11.ctor === 'Just') {
 			return _elm_lang$core$Maybe$Just(
 				A3(
 					_user$project$Tabs_SelectList$SelectList,
-					A2(_elm_lang$core$List$filterMap, f, _p11),
-					_p9._0,
-					A2(_elm_lang$core$List$filterMap, f, _p10)));
+					A2(_elm_lang$core$List$filterMap, f, _p13),
+					_p11._0,
+					A2(_elm_lang$core$List$filterMap, f, _p12)));
 		} else {
 			return _user$project$Tabs_SelectList$fromList(
 				A2(
@@ -11218,49 +11227,49 @@ var _user$project$Tabs_SelectList$filterMap = F2(
 					_elm_lang$core$List$concat(
 						{
 							ctor: '::',
-							_0: _p11,
+							_0: _p13,
 							_1: {
 								ctor: '::',
-								_0: _p10,
+								_0: _p12,
 								_1: {ctor: '[]'}
 							}
 						})));
 		}
 	});
 var _user$project$Tabs_SelectList$filter = F2(
-	function (f, _p12) {
-		var _p13 = _p12;
-		var _p16 = _p13._1;
-		var _p15 = _p13._0;
-		var _p14 = _p13._2;
-		return f(_p16) ? _elm_lang$core$Maybe$Just(
+	function (f, _p14) {
+		var _p15 = _p14;
+		var _p18 = _p15._1;
+		var _p17 = _p15._0;
+		var _p16 = _p15._2;
+		return f(_p18) ? _elm_lang$core$Maybe$Just(
 			A3(
 				_user$project$Tabs_SelectList$SelectList,
-				A2(_elm_lang$core$List$filter, f, _p15),
-				_p16,
-				A2(_elm_lang$core$List$filter, f, _p14))) : _user$project$Tabs_SelectList$fromList(
+				A2(_elm_lang$core$List$filter, f, _p17),
+				_p18,
+				A2(_elm_lang$core$List$filter, f, _p16))) : _user$project$Tabs_SelectList$fromList(
 			A2(
 				_elm_lang$core$List$filter,
 				f,
 				_elm_lang$core$List$concat(
 					{
 						ctor: '::',
-						_0: _p15,
+						_0: _p17,
 						_1: {
 							ctor: '::',
-							_0: _p14,
+							_0: _p16,
 							_1: {ctor: '[]'}
 						}
 					})));
 	});
 var _user$project$Tabs_SelectList$map = F2(
-	function (f, _p17) {
-		var _p18 = _p17;
+	function (f, _p19) {
+		var _p20 = _p19;
 		return A3(
 			_user$project$Tabs_SelectList$SelectList,
-			A2(_elm_lang$core$List$map, f, _p18._0),
-			f(_p18._1),
-			A2(_elm_lang$core$List$map, f, _p18._2));
+			A2(_elm_lang$core$List$map, f, _p20._0),
+			f(_p20._1),
+			A2(_elm_lang$core$List$map, f, _p20._2));
 	});
 
 var _user$project$Tabs_Tree$leaves = function (t) {
@@ -11641,16 +11650,11 @@ var _user$project$Tabs$init = function (toMsg) {
 			sections: _elm_lang$core$Maybe$Just(
 				A3(
 					_user$project$Tabs_Tree$Node,
-					{orientation: _user$project$Tabs_Section$Horizontal, offset: 40},
+					{orientation: _user$project$Tabs_Section$Vertical, offset: 40},
 					_user$project$Tabs_Tree$Leaf(
 						_user$project$Tabs_SelectList$singleton('1')),
-					A3(
-						_user$project$Tabs_Tree$Node,
-						{orientation: _user$project$Tabs_Section$Vertical, offset: 60},
-						_user$project$Tabs_Tree$Leaf(
-							_user$project$Tabs_SelectList$singleton('1')),
-						_user$project$Tabs_Tree$Leaf(
-							_user$project$Tabs_SelectList$singleton('2')))))
+					_user$project$Tabs_Tree$Leaf(
+						_user$project$Tabs_SelectList$singleton('2'))))
 		});
 };
 var _user$project$Tabs$updateSections = F2(

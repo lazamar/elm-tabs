@@ -67,17 +67,11 @@ init toMsg =
         , sections =
             Just <|
                 Node
-                    { orientation = Horizontal
+                    { orientation = Vertical
                     , offset = 40
                     }
                     (Leaf <| SelectList.singleton "1")
-                    (Node
-                        { orientation = Vertical
-                        , offset = 60
-                        }
-                        (Leaf <| SelectList.singleton "1")
-                        (Leaf <| SelectList.singleton "2")
-                    )
+                    (Leaf <| SelectList.singleton "2")
         }
 
 

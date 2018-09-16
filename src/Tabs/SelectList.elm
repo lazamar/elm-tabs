@@ -2,6 +2,7 @@ module Tabs.SelectList
     exposing
         ( SelectList
         , singleton
+        , cons
         , fromList
         , fromNonempty
         , toList
@@ -32,6 +33,11 @@ type SelectList a
 singleton : a -> SelectList a
 singleton v =
     SelectList [] v []
+
+
+cons : a -> SelectList a -> SelectList a
+cons a (SelectList before selected after) =
+    SelectList (a :: before) selected after
 
 
 fromList : List a -> Maybe (SelectList a)
